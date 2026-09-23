@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: salon
+      POSTGRES_PASSWORD: salon_pass
+      POSTGRES_DB: salon_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://salon:salon_pass@db:5432/salon_db
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      PORT: 8000
+    command: sh -c "python -m app.create_tables && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+
+  ui:
+    build: .
+    depends_on:
+      - backend
+    environment:
+      DATABASE_URL: postgresql://salon:salon_pass@db:5432/salon_db
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      BACKEND_URL: http://backend:8000
+      PORT: 8501
+    command: streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+
+volumes:
+  db_data:

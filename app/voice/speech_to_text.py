@@ -2,9 +2,7 @@ import os
 import threading
 
 import numpy as np
-import sounddevice as sd
 
-from scipy.io.wavfile import write
 from faster_whisper import WhisperModel
 
 
@@ -41,6 +39,10 @@ def record_until_enter(
     sample_rate=SAMPLE_RATE,
     device=MICROPHONE_DEVICE,
 ):
+    # Local-machine terminal testing only; imported lazily so servers
+    # without a microphone/sounddevice can still import this module.
+    import sounddevice as sd
+    from scipy.io.wavfile import write
 
     print("\nPress ENTER to start recording.")
 

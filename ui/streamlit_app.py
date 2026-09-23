@@ -1,3 +1,4 @@
+import os
 import sys
 import hashlib
 from pathlib import Path
@@ -28,7 +29,7 @@ from app.voice.speech_to_text import transcribe_uploaded_audio
 # CONFIGURATION
 # --------------------------------------------------
 
-BACKEND_URL = "http://127.0.0.1:8000"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 
 # --------------------------------------------------
