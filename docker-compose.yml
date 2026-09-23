@@ -16,7 +16,9 @@ services:
       retries: 10
 
   backend:
-    image: salon-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     depends_on:
       db:
         condition: service_healthy
@@ -24,12 +26,13 @@ services:
       DATABASE_URL: postgresql://salon:salon_pass@db:5432/salon_db
       GROQ_API_KEY: ${GROQ_API_KEY}
       PORT: 8000
-    command: sh -c "python -m app.create_tables && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
 
   ui:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     depends_on:
       - backend
     environment:
@@ -37,7 +40,6 @@ services:
       GROQ_API_KEY: ${GROQ_API_KEY}
       BACKEND_URL: http://backend:8000
       PORT: 8501
-    command: streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
     ports:
       - "8501:8501"
 

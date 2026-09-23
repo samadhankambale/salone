@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# faster-whisper/ctranslate2 need libgomp at runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# The UI imports app.database / app.services / app.voice directly,
+# so it needs the backend package alongside its own code.
+COPY app ./app
+COPY ui ./ui
+
+EXPOSE 8501
+
+CMD ["sh", "-c", "streamlit run ui/streamlit_app.py --server.port ${PORT:-8501} --server.address 0.0.0.0"]
