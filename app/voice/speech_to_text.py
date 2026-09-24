@@ -16,18 +16,34 @@ MICROPHONE_DEVICE = 1
 
 
 # --------------------------------------------------
-# LOAD WHISPER MODEL
+# LOAD WHISPER MODEL (lazily, on first use)
 # --------------------------------------------------
 
-print("Loading Whisper model...")
+_model = None
+_model_lock = threading.Lock()
 
-model = WhisperModel(
-    "small.en",
-    device="cpu",
-    compute_type="int8",
-)
 
-print("Whisper model loaded successfully.")
+def get_model():
+
+    global _model
+
+    if _model is None:
+
+        with _model_lock:
+
+            if _model is None:
+
+                print("Loading Whisper model...")
+
+                _model = WhisperModel(
+                    "small.en",
+                    device="cpu",
+                    compute_type="int8",
+                )
+
+                print("Whisper model loaded successfully.")
+
+    return _model
 
 
 # --------------------------------------------------
@@ -103,7 +119,7 @@ def transcribe_audio(filename="user_audio.wav"):
 
     print("Transcribing...")
 
-    segments, info = model.transcribe(
+    segments, info = get_model().transcribe(
         filename,
         language="en",
         task="transcribe",
